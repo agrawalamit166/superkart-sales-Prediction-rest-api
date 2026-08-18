@@ -15,33 +15,40 @@ model = load_model()
 st.title("the superkart sales Prediction")
 st.write("This tool predicts the sales amount based on the superkart details.")
 
-st.subheader("Enter the listing details:")
+# Instructions
+st.markdown("🔍 Enter product and store attributes to forecast **monthly product sales revenue**.\n\n_All sales are reported in ($) USD._")
 
 # Collect user input
-room_type = st.selectbox("Room Type", ["Entire home/apt", "Private room", "Shared room"])
-accommodates = st.number_input("Accommodates (Number of guests)", min_value=1, value=2)
-bathrooms = st.number_input("Bathrooms", min_value=1, step=1, value=2)
-cancellation_policy = st.selectbox("Cancellation Policy (kind of cancellation policy)", ["strict", "flexible", "moderate"])
-cleaning_fee = st.selectbox("Cleaning Fee Charged?", ["True", "False"])
-instant_bookable = st.selectbox("Instantly Bookable?", ["False", "True"])
-review_scores_rating = st.number_input("Review Score Rating", min_value=0.0, max_value=100.0, step=1.0, value=90.0)
-bedrooms = st.number_input("Bedrooms", min_value=0, step=1, value=1)
-beds = st.number_input("Beds", min_value=0, step=1, value=1)
+Product_Weight = st.number_input("Product Weight (oz)", min_value=0.0, value=12.66)
+Product_Sugar_Content = st.selectbox("Product Sugar Content", ["Low Sugar", "Regular", "No Sugar"])
+Product_Allocated_Area = st.number_input("Product Allocated Area (linear in.)", min_value=0.0, value=100.0)
+Product_MRP = st.number_input("Maximum Retail Price (USD)", min_value=0.0, value=150.0)
+Store_Size = st.selectbox("Store Size", ["Small", "Medium", "High"])
+Store_Location_City_Type = st.selectbox("Store Location City Type", ["Tier 1", "Tier 2", "Tier 3"])
+Store_Type = st.selectbox("Store Type", ["Supermarket Type1", "Supermarket Type2", "Departmental Store", "Food Mart"])
+Store_Age_Years = st.slider("Store Age (years)", min_value=0, max_value=30, value=10)
+Product_Type_Category = st.selectbox("Product Type Category", ["Perishables", "Non Perishables"])
 
-# Convert user input into a DataFrame
-input_data = pd.DataFrame([{
-    'room_type': room_type,
-    'accommodates': accommodates,
-    'bathrooms': bathrooms,
-    'cancellation_policy': cancellation_policy,
-    'cleaning_fee': cleaning_fee,
-    'instant_bookable': 'f' if instant_bookable=="False" else "t",
-    'review_scores_rating': review_scores_rating,
-    'bedrooms': bedrooms,
-    'beds': beds
-}])
+# Apply log1p transform (must match backend model training)
+Product_Allocated_Area_Log = np.log1p(Product_Allocated_Area)
+
+# Prepare JSON payload for the backend
+product_data = {
+    "Product_Weight": str(Product_Weight),
+    "Product_Sugar_Content": Product_Sugar_Content,
+    "Product_Allocated_Area": str(Product_Allocated_Area),
+    "Product_MRP": str(Product_MRP),
+    "Store_Size": Store_Size,
+    "Store_Location_City_Type": Store_Location_City_Type,
+    "Store_Type": Store_Type,
+    "Store_Age_Years": str(Store_Age_Years),
+    "Product_Type_Category": Product_Type_Category
+}
 
 # Predict button
-if st.button("Predict"):
-    prediction = model.predict(input_data)
-    st.write(f"The predicted price of the rental property is ${np.exp(prediction)[0]:.2f}.")
+if st.button("Predict", type='primary'):
+  try:
+    prediction = model.predict(product_data)
+    st.success(f"Predicted Monthly Sales: **${prediction:,.2f} USD**")
+  except Exception as e:
+      st.error(f"⚠️ Connection error: {e}")
