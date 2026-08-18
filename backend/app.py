@@ -19,8 +19,8 @@ def predict_sales():
   try:
     # Get JSON data from the request
     data  = request.get_json()
-    print("Raw incoming data:", data)   
-    
+    print("Raw incoming data:", data)
+
     # Validate expected fields
     required_fields = [
         'Product_Weight',
