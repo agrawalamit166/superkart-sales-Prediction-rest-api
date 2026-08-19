@@ -48,7 +48,18 @@ product_data = {
 # Predict button
 if st.button("Predict", type='primary'):
   try:
-    prediction = model.predict(product_data)
+    # Convert dictionary to DataFrame
+    input_df = pd.DataFrame([product_data])
+
+    # Make prediction
+    prediction = model.predict(input_df)[0]
+
+
+    # Print prediction value
+    st.write("Raw Prediction Value:", prediction)
+
     st.success(f"Predicted Monthly Sales: **${prediction:,.2f} USD**")
   except Exception as e:
       st.error(f"⚠️ Connection error: {e}")
+
+print()
