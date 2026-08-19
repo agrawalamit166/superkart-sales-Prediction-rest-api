@@ -1,5 +1,6 @@
 import joblib
 import pandas as pd
+import numpy as np
 from flask import Flask, request, jsonify
 
 # Initialize Flask app
@@ -41,7 +42,7 @@ def predict_sales():
     sample = {
         'Product_Weight': float(data['Product_Weight']),
         'Product_Sugar_Content': data['Product_Sugar_Content'],
-        'Product_Allocated_Area_Log': np.log1p(float(data['Product_Allocated_Area'])),  # transform here
+        'Product_Allocated_Area_Log': np.log1p(float(data['Product_Allocated_Area'])),
         'Product_MRP': float(data['Product_MRP']),
         'Store_Size': data['Store_Size'],
         'Store_Location_City_Type': data['Store_Location_City_Type'],
