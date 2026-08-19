@@ -1,15 +1,9 @@
 
 import streamlit as st
 import pandas as pd
-import joblib
 import numpy as np
 
-# Load the trained model
-@st.cache_resource
-def load_model():
-    return joblib.load("/content/drive/MyDrive/p7_ModelDeployment/backend_files/superkart_sales_forecast_model_v1_0.joblib")
 
-model = load_model()
 
 # Streamlit UI for Price Prediction
 st.title("the superkart sales Prediction")
@@ -45,21 +39,18 @@ product_data = {
     "Product_Type_Category": Product_Type_Category
 }
 
-# Predict button
+# Trigger Prediction
 if st.button("Predict", type='primary'):
-  try:
-    # Convert dictionary to DataFrame
-    input_df = pd.DataFrame([product_data])
-
-    # Make prediction
-    prediction = model.predict(input_df)[0]
-
-
-    # Print prediction value
-    st.write("Raw Prediction Value:", prediction)
-
-    st.success(f"Predicted Monthly Sales: **${prediction:,.2f} USD**")
-  except Exception as e:
-      st.error(f"⚠️ Connection error: {e}")
-
-print()
+    try:
+        response = requests.post(
+            "https://obscure-system-vw6jwxj5v5fp9xg-7860.app.github.dev/v1/predict",
+            json=product_data
+        )
+        if response.status_code == 200:
+            result = response.json()
+            predicted_sales = result["Predicted_Sales"]
+            st.success(f"📈 Predicted Monthly Sales: **${predicted_sales:,.2f} USD**")
+        else:
+            st.error("❌ API Error: Please verify input values or try again later.")
+    except Exception as e:
+        st.error(f"⚠️ Connection error: {e}")
